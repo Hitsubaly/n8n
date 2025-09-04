@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agenda de Reuniões — Theophilus</title>
+  <style>
+  :root {
+    --color-bg: #fafafa;
+    --color-panel: #fff;
+    --color-border: #e5e5e5;
+    --color-accent: #c08b1b;
+    --color-text: #111;
+    --radius: 12px;
+    --shadow: 0 2px 10px rgba(0,0,0,.04);
+    --maxw: 1100px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-bg: #111;
+      --color-panel: #1e1e1e;
+      --color-border: #333;
+      --color-text: #f1f1f1;
+      --shadow: 0 2px 10px rgba(0,0,0,.6);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.5;
+  }
+  h1 { font-size: clamp(1.5rem, 3vw, 2rem); margin: 0; }
+  header { padding: 1.5rem 1rem; text-align: center; }
+  header p { max-width: 760px; margin: .5rem auto; color: #555; }
+  .container {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 1.5rem;
+    padding: 0 1rem 2rem;
+  }
+  @media(max-width:900px){
+    .container { grid-template-columns: 1fr; }
+  }
+  .panel, .detail {
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1rem;
+  }
+  .panel { position: sticky; top: 1rem; height: fit-content; }
+  .list { display: flex; flex-direction: column; gap: .5rem; max-height: 70vh; overflow: auto; }
+  .tool { display: flex; align-items: center; border: 1px solid var(--color-border); border-radius: var(--radius); padding: .4rem .6rem; margin-bottom: .75rem; }
+  .tool span { margin-right: .4rem; }
+  .tool input, .tool select { border: none; background: transparent; flex: 1; min-width: 0; outline: none; color: inherit; font: inherit; }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: .55rem .65rem;
+    background: var(--color-panel);
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  .item:hover, .item:focus { border-color: var(--color-accent); }
+  .item[aria-selected="true"] {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+  .badge {
+    flex: 0 0 auto;
+    font-weight: 700;
+    font-size: .9rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: .2rem .5rem;
+  }
+  .meta {
+    font-size: .9rem;
+    color: #555;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  @media (prefers-color-scheme: dark) {
+    .meta { color: #bbb; }
+  }
+  .detail-header { display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem; }
+  .detail-title { font-weight:700; font-size:1rem; display:flex; align-items:center; gap:.5rem; }
+  .nav { display:flex; gap:.4rem; margin-left:auto; }
+  .nav button { border:1px solid var(--color-border); background:var(--color-panel); border-radius: var(--radius); padding:.35rem .6rem; cursor:pointer; }
+  .nav button:hover { border-color: var(--color-accent); }
+  .kv { display:grid; grid-template-columns:150px 1fr; gap:.5rem; font-size:.95rem; }
+  .k { font-weight:600; }
+  .empty { padding:1rem 0; color:#777; text-align:center; }
+  @media (prefers-color-scheme: dark) {
+    .empty { color:#999; }
+  }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Agenda de Reuniões — 2025–2026</h1>
+  <p class="lead">Pesquise por assunto, lembrete ou data. Selecione uma data para ver os detalhes.</p>
+</header>
+<div class="container">
+  <aside class="panel" aria-label="Pesquisar e filtrar">
+    <label class="tool" title="Buscar por palavra">
+      <span>🔎</span>
+      <input id="q" type="search" placeholder="Buscar…" oninput="applyFilters()">
+    </label>
+    <label class="tool">
+      <span>📅</span>
+      <select id="mes" onchange="applyFilters()"><option value="">Todos os meses</option></select>
+    </label>
+    <label class="tool">
+      <span>🏷️</span>
+      <select id="tipo" onchange="applyFilters()">
+        <option value="">Todos os tipos</option>
+        <option>Intensivão</option>
+        <option>Férias</option>
+      </select>
+    </label>
+    <div class="list" id="lista" role="listbox" aria-label="Lista de reuniões"></div>
+  </aside>
+  <section class="detail" id="detalhe" aria-live="polite">
+    <div class="empty">Selecione uma data à esquerda.</div>
+  </section>
+</div>
+
+<script id="data" type="application/json">
+{"titulo": "Agenda de Reuniões Theophilus (2025–2026)", "rows": [
+{"data":"17/08/2025","date_iso":"2025-08-17","mes":"2025-08","lembrete":"","observacao":"Introdução T5","assunto":"Introdução e boas vindas","aprofundamento":"Importância da Palavra de Deus e Método Theophilus","cic_formacao":"CIC 128-130: Valor do AT para o cristianismo","arte_cultura":"0","tipo":""},
+{"data":"24/08/2025","date_iso":"2025-08-24","mes":"2025-08","lembrete":"","observacao":"","assunto":"Gn 1-21","aprofundamento":"Criação Mundo e ser humano. Pecado","cic_formacao":"CIC 356-351: O ser humano é 'imagem de Deus'","arte_cultura":"ARTE: Afresco 'Criação' (Capela Sixtina) - Gn 1","tipo":""},
+{"data":"31/08/2025","date_iso":"2025-08-31","mes":"2025-08","lembrete":"","observacao":"","assunto":"Gn 22-37","aprofundamento":"Os Patriarcas: Abraão, Isaac, Jacó, José","cic_formacao":"CIC 56-61: a Aliança com Noé e a eleição de Abraão","arte_cultura":"ARTE: Pintura 'O sacrifício de Isaac', de Paolo Veronese (Museu Kunsthistorisches, Viena) - Gn 22","tipo":""},
+{"data":"03/09/2025","date_iso":"2025-09-03","mes":"2025-09","lembrete":"21h (BR)","observacao":"INTENSIVÃO","assunto":"MÊS DA BÍBLIA 2025","aprofundamento":"Importância da leitura bíblica (Dei Verbum)","cic_formacao":"Diferença Bíblia católica e protestante","arte_cultura":"POESIA: Poema 'Ocaso' de Oswald de Andrade","tipo":"Intensivão"},
+{"data":"07/09/2025","date_iso":"2025-09-07","mes":"2025-09","lembrete":"","observacao":"","assunto":"Gn 38-50","aprofundamento":"Introdução ao Êxodo - Faraó - Decálogo - Imagens","cic_formacao":"Formação: Semelhanças Moisés e Jesus","arte_cultura":"ARTE: Mosaico 'Os 12 líderes das 12 tribos' (Basílica San Vitale, Ravenna) - Gn 49","tipo":""}
+]}
+</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+const months = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+(function init(){
+  const ms = Array.from(new Set(DATA.rows.map(r=>r.mes))).sort();
+  const sel = $("#mes");
+  ms.forEach(m=>{
+    const [y,mm] = m.split("-");
+    const opt = document.createElement('option');
+    opt.value = m; opt.textContent = months[parseInt(mm,10)-1]+" de "+y;
+    sel.appendChild(opt);
+  });
+  renderList();
+})();
+function applyFilters(){
+  renderList();
+  const first = $('#lista .item'); if(first) first.click();
+}
+function matchesQuery(rec, q){
+  if(!q) return true; q = q.toLowerCase();
+  return ['data','lembrete','observacao','assunto','aprofundamento','cic_formacao','arte_cultura','tipo']
+    .some(k => String(rec[k]||'').toLowerCase().includes(q));
+}
+function renderList(){
+  const q = ($('#q').value||'').trim().toLowerCase();
+  const mes = $('#mes').value;
+  const tipo = $('#tipo').value;
+  const list = $('#lista');
+  list.innerHTML='';
+  let rows = DATA.rows.slice();
+  if(mes) rows = rows.filter(r=>r.mes===mes);
+  if(tipo) rows = rows.filter(r=>r.tipo===tipo);
+  rows = rows.filter(r=>matchesQuery(r, q));
+  rows.forEach(r=>{
+    const it=document.createElement('div');
+    it.className='item';
+    it.setAttribute('role','option');
+    it.tabIndex=0;
+    it.innerHTML=`<span class="badge">${r.data}</span><div class="meta">${r.assunto||r.observacao||r.lembrete||'—'}</div>`+(r.tipo?`<span class="badge" style="background:var(--color-accent);color:#fff;border-color:var(--color-accent)">${r.tipo}</span>`:'');
+    it.addEventListener('click', ()=>selectRow(r,it));
+    it.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectRow(r,it);}});
+    list.appendChild(it);
+  });
+  if(rows.length===0) list.innerHTML='<div class="empty">Sem resultados.</div>';
+}
+function selectRow(r, el){
+  $$('.item').forEach(n=>n.setAttribute('aria-selected','false'));
+  if(el) el.setAttribute('aria-selected','true');
+  renderDetail(r);
+}
+function renderDetail(r){
+  const box=$('#detalhe');
+  const blocos=[
+    ['Lembrete',r.lembrete],
+    ['Observação',r.observacao],
+    ['Assunto da reunião',r.assunto],
+    ['Aprofundamento',r.aprofundamento],
+    ['CIC / Documentos para formação',r.cic_formacao],
+    ['Bíblia, Arte, Cultura e Poesia',r.arte_cultura],
+  ].filter(([k,v])=>String(v||'').trim()!=='')
+   .map(([k,v])=>`<div class="k">${k}</div><div class="v">${v}</div>`)
+   .join('')||'<div class="k">Informações</div><div class="v">Sem detalhes.</div>';
+  box.innerHTML=`<div class="detail-header"><div class="detail-title"><span class="badge">${r.data}</span>${r.tipo?`<span class="badge" style="background:var(--color-accent);color:#fff;border-color:var(--color-accent)">${r.tipo}</span>`:''}</div><div class="nav"><button onclick="nav(-1)">&larr; Anterior</button><button onclick="nav(1)">Próximo &rarr;</button></div></div><div class="kv">${blocos}</div>`;
+}
+function nav(step){
+  const items=$$('.item');
+  if(!items.length) return;
+  let i=items.findIndex(el=>el.getAttribute('aria-selected')==='true');
+  i=i<0?0:i+step;
+  i=Math.max(0,Math.min(items.length-1,i));
+  items[i].click();
+  items[i].scrollIntoView({block:'nearest'});
+}
+</script>
+</body>
+</html>
